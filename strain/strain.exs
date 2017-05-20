@@ -7,8 +7,17 @@ defmodule Strain do
   """
   @spec keep(list :: list(any), fun :: ((any) -> boolean)) :: list(any)
   def keep(list, fun) do
-    Enum.map(list, fn(item) -> if fun.(item), do: item end)
-    |> discard_nil
+    keep([], list, fun)
+  end
+
+  def keep(new_list, list, fun) when list != [] do
+    [item | tail] = list
+    if(fun.(item), do: [item | new_list], else: new_list)
+      |> keep(tail, fun)
+  end
+
+  def keep(new_list, [], _fun) do
+    Enum.reverse(new_list)
   end
 
   @doc """
@@ -20,9 +29,5 @@ defmodule Strain do
   @spec discard(list :: list(any), fun :: ((any) -> boolean)) :: list(any)
   def discard(list, fun) do
     list -- keep(list, fun)
-  end
-
-  defp discard_nil(list) do
-    Enum.reject(list, fn(item) -> item == nil end)
   end
 end
